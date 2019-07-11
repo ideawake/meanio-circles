@@ -71,23 +71,30 @@ module.exports = function(Circles, app) {
         });        
     },
     userCount: function(req, res) {
-        var User = mongoose.model('User');
-        var query = {}
-        var circles = []
-        if (req.body&&req.body.permissions&&req.body.permissions.length > 0) {
-            for(var x in req.body.permissions) {
-              if((req.body.permissions[x] !== undefined)) {
-                circles.push(req.body.permissions[x]);
+        let helpers = require('../../../../packages/custom/admindashboard/server/models/helper-methods');
+        var circles = [];       
+        if (
+            req.query && 
+            typeof(req.query.permissions) != 'string' && 
+            req.query.permissions.length > 0
+            ) {
+            for(var x in req.query.permissions) {
+              if((req.query.permissions[x] !== undefined)) {
+                circles.push(req.query.permissions[x]);
               }
             }
+        } else if (
+            req.query && 
+            typeof(req.query.permissions) == 'string'
+            ) {
+                circles.push(req.query.permissions);
         }
-        if (circles.length > 0) {
-            query = {'roles' : {$in : circles }};
-        } else {
-            query = {'roles' : {$in : ['authenticated'] }};
+        if (circles.length < 0) {
+            circles.push('authenticated');
         }
-        User.count(query, function(err, count) {
-            res.json({'count' : count});
+        helpers.getActiveAndPendingUsers(circles)
+        .then(users => {
+            res.json({'count' : users.length});
         });
     },
     mine: function(req, res) {
