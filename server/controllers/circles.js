@@ -75,6 +75,7 @@ module.exports = function(Circles, app) {
         var circles = [];       
         if (
             req.query && 
+            req.query.permissions &&
             typeof(req.query.permissions) != 'string' && 
             req.query.permissions.length > 0
             ) {
@@ -89,7 +90,7 @@ module.exports = function(Circles, app) {
             ) {
                 circles.push(req.query.permissions);
         }
-        if (circles.length < 0) {
+        if (circles.length == 0) {
             circles.push('authenticated');
         }
         helpers.getActiveAndPendingUsers(circles)
